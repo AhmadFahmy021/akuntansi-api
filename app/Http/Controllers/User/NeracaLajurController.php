@@ -24,14 +24,34 @@ class NeracaLajurController extends Controller
             $data[$key] = [
                 'akun' => $dataAkun[$key],
                 'sub_akun' => $dataSubAkun[$key],
+
                 "debit" =>
-                ((Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('debit') - Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('kredit')) > 0) ?
-                Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('debit') - Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('kredit') : 0 ,
+                ((
+                    Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('debit')
+                    -
+                    Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('kredit')
+
+                ) > 0) ?
+
+                Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('debit')
+                -
+                Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('kredit') : 0 ,
 
                 "kredit" =>
-                ((Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('debit') - Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('kredit')) < 0) ?
-                Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('debit') - Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('kredit') : 0,
+                ((
+                Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('debit')
+                -
+                Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('kredit')
+                ) < 0) ?
+
+                (Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('debit')
+                -
+                Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('kredit')) * -1  : 0,
             ];
+
+            // if ($dataAkun[$key]->saldo_normal == 'debit') {
+            //     # code...
+            // }
         }
         return response()->json([
             'success' => true,
@@ -55,7 +75,7 @@ class NeracaLajurController extends Controller
 
                 "kredit" =>
                 (Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('debit') - Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('kredit') < 0) ?
-                Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('debit') - Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('kredit') : 0,
+                (Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('debit') - Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('kredit')) * -1 : 0,
             ];
         }
         return response()->json([

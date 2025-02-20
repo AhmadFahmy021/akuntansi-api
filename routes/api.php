@@ -15,6 +15,7 @@ use App\Http\Controllers\User\DashboardController;
 use App\Http\Controllers\User\JurnalController;
 use App\Http\Controllers\User\KeuanganController;
 use App\Http\Controllers\User\KRSController;
+use App\Http\Controllers\User\LaporanController;
 use App\Http\Controllers\User\NeracaLajurController;
 use App\Http\Controllers\User\PerusahaanController;
 use App\Http\Controllers\User\ProfileMahasiswaController;
@@ -68,6 +69,8 @@ Route::prefix('/mahasiswa')->group(
             Route::post('/perusahaan/status', [PerusahaanController::class, 'status']);
             Route::get('/dashboard', [DashboardController::class, 'dashboard']);
             Route::post('/dashboard/chart', [DashboardController::class, 'chartDashboard']);
+            Route::get('/laporan/keuangan', [LaporanController::class, 'keuangan']);
+            // Route::post('/dashboard/chart', [DashboardController::class, 'chartDashboard']);
 
             Route::apiResource('/krs', KRSController::class);
             Route::apiResource('/perusahaan', PerusahaanController::class);

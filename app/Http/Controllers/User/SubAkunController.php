@@ -28,12 +28,12 @@ class SubAkunController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // 'kode' => 'required|string',
+            'kode' => 'required|string',
             'nama' => 'required|string',
             'akun_id' => 'required|uuid',
             'perusahaan_id' => 'required|uuid'
         ]);
-        $akun = Akun::where('id', $request['akun_id'])->first();
+        $akun = Akun::where('id', $request->akun_id)->first();
         $validated['kode'] = $akun->kode.'.'.$request->kode;
         if ($akun->status == 'open') {
             SubAkun::create($validated);
@@ -73,26 +73,39 @@ class SubAkunController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        try {
+        // try {
             $subAkun = SubAkun::with(['akun', 'perusahaan'])->findOrFail($id);
-            $request = $request->validate([
-                'kode' => 'sometimes|integer',
+            $validated = $request->validate([
+                'kode' => 'sometimes|string',
                 'nama' => 'sometimes|string',
                 'akun_id' => 'sometimes|uuid',
                 'perusahaan_id' => 'sometimes|uuid'
             ]);
-            $subAkun->update($request);
+
+            if (array_key_exists('akun_id', $validated)) {
+                $akun = Akun::where('id', $request->akun_id)->first();
+                $validated['kode'] = $akun->kode.'.'.$validated['kode'];
+            } else if (array_key_exists('kode', $validated)) {
+                $kode = explode('.', $subAkun->kode);
+                // $kodeSubAkun = end($kode);
+                $kodeAkun = $kode[0];
+                $validated['kode'] = $kodeAkun.'.'.$validated['kode'];
+                // dd($kode);
+                // $validated['kode'] = ;
+            } 
+            // dd(array_key_exists('akun_id', $validated));
+            $subAkun->update($validated);
             return response()->json([
                 'success' => true,
                 'message' => 'Data Successfully Changed',
                 'data' => $subAkun
             ],200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Data Failed Changed',
-            ],404);
-        }
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         'success' => true,
+        //         'message' => 'Data Failed Changed',
+        //     ],404);
+        // }
     }
 
     /**

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->integer('kode');
             $table->string('nama');
+            $table->string('saldo_normal', 100)->default('debit');
             $table->string('status', 100)->default('close');
             $table->foreignUuid('kategori_id')->constrained('kategori')->cascadeOnDelete();
             $table->timestamps();

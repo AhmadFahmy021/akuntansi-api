@@ -19,6 +19,7 @@ class ProfileMahasiswaController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data,
+            'user' => Auth::user(),
         ], 200);
     }
 
@@ -34,12 +35,12 @@ class ProfileMahasiswaController extends Controller
             'tempat' => 'nullable|string',
             'tanggal_lahir' => 'nullable|date',
             'foto' => 'mimes:jpg,png,jpeg|max:3048',
-            'hp' => 'required|numeric',
+            'hp' => 'nullable|numeric',
             'intagram' => 'nullable',
             'tiktok' => 'nullable',
             'facebook' => 'nullable',
         ]);
-        $validated['user_id'] = $request->user()->id;
+        $validated['user_id'] = Auth::user()->id;
         if ($request->hasFile("foto") && $request->file('foto')->isValid()) {
             $validated['foto'] = $request->file('foto')->store('profiles', 'public');
         }

@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('nama');
             $table->text('alamat');
             $table->integer('tahun_berdiri');
+            $table->date('start_priode');
+            $table->date('end_priode');
             $table->string('status', 100)->default('offline');
             $table->foreignUuid('kategori_id')->constrained('kategori')->cascadeOnDelete();
             // $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
