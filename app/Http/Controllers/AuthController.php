@@ -52,9 +52,6 @@ class AuthController extends Controller
         $request['password'] = Hash::make($request['password']);
         $user = User::create($validated);
 
-        $iduser = $user['id'];
-        ProfileMahasiswa::create($iduser);
-
         $data['name'] = $user->name;
         $data['nim'] = $user->nim;
         $data['email'] = $user->email;
@@ -118,7 +115,7 @@ class AuthController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'password' => 'required',
-        ]);
+        ]); 
 
         $request['password'] = Hash::make($request['password']);
         $request['role'] = 2;
