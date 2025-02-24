@@ -88,5 +88,74 @@ class LaporanController extends Controller
         ]);
     }
     
+    public function labarugi() {
+        // Mendapatkan perusahaan yang online
+        $krs = Krs::where('user_id', Auth::user()->id)->pluck('id');
+        $perusahaan = Perusahaan::whereIn('krs_id', $krs)->where('status', 'online')->first();
+    
+        if (!$perusahaan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Perusahaan tidak ditemukan atau belum online.'
+            ], 404);
+        }
+    
+        // Ambil data akun berdasarkan kategori yang relevan
+        $dataAkun = Akun::whereIn('kode', [4100, 4200, 4300, 4400, 4500])->get();
+    
+        $data = [];
+    
+        // Mengambil nilai debit dan kredit untuk masing-masing akun
+        foreach ($dataAkun as $akun) {
+            $totalDebit = Jurnal::where('akun_id', $akun->id)->sum('debit');
+            $totalKredit = Jurnal::where('akun_id', $akun->id)->sum('kredit');
+    
+            // Tentukan nilai yang akan ditampilkan berdasarkan saldo normal
+            $nilai = ($akun->saldo_normal == 'debit') ? ($totalDebit - $totalKredit) : ($totalKredit - $totalDebit);
+            $nilai = abs($nilai); // Pastikan tidak negatif
+    
+            // Menyusun data hasil laporan
+            $data[$akun->nama] = [
+                'akun' => $akun,
+                'nilai' => $nilai,
+                'debit' => $totalDebit,
+                'kredit' => $totalKredit
+            ];
+        }
+    
+        // Menghitung Hasil Retur Penjualan & Potongan Penjualan
+        $hasilReturDanPotongan = ($data['Retur Penjualan']['nilai'] + $data['Potongan Penjualan']['nilai']);
+    
+        // Menghitung Penjualan Bersih
+        $penjualanBersih = $data['Penjualan']['nilai'] - $hasilReturDanPotongan;
+    
+        // Menghitung Hasil Pendapatan Jasa Servis Kendaraan & Laba atas Transaksi Tukar Tambah
+        $hasilPendapatanJasaDanLaba = ($data['Pendapatan Jasa Servis Kendaraan']['nilai'] + $data['Laba atas Transaksi Tukar Tambah']['nilai']);
+    
+        // Menghitung Total Penghasilan
+        $totalPenghasilan = $penjualanBersih + $hasilPendapatanJasaDanLaba;
+    
+        // Menyusun hasil laporan
+        $result = [
+            'Penjualan' => $data['Penjualan']['nilai'],
+            'Potongan Penjualan' => $data['Potongan Penjualan']['nilai'],
+            'Retur Penjualan' => $data['Retur Penjualan']['nilai'],
+            'Hasil Retur Penjualan & Potongan Penjualan' => $hasilReturDanPotongan,
+            'Penjualan Bersih' => $penjualanBersih,
+            'Pendapatan Jasa Servis Kendaraan' => $data['Pendapatan Jasa Servis Kendaraan']['nilai'],
+            'Laba atas Transaksi Tukar Tambah' => $data['Laba atas Transaksi Tukar Tambah']['nilai'],
+            'Hasil Pendapatan Jasa Servis Kendaraan & Laba atas Transaksi Tukar Tambah' => $hasilPendapatanJasaDanLaba,
+            'Total Penghasilan' => $totalPenghasilan
+        ];
+    
+        // Return response JSON
+        return response()->json([
+            'success' => true,
+            'perusahaan' => $perusahaan,
+            'data' => $result
+        ]);
+    }
+    
+
     
 }

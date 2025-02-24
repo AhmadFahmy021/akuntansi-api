@@ -86,7 +86,7 @@ class PerusahaanController extends Controller
                 'nama' => 'sometimes|string',
                 'alamat' => 'sometimes|string',
                 'tahun_berdiri' => 'sometimes|integer',
-                'status' => 'sometimes|string|in:active,inactive',
+                'status' => 'sometimes|string|in:online,offline',
                 'kategori_id' => 'sometimes',
                 'krs_id' => 'sometimes',
             ]);
