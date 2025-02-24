@@ -70,6 +70,7 @@ Route::prefix('/mahasiswa')->group(
             Route::get('/dashboard', [DashboardController::class, 'dashboard']);
             Route::post('/dashboard/chart', [DashboardController::class, 'chartDashboard']);
             Route::get('/laporan/keuangan', [LaporanController::class, 'keuangan']);
+            Route::get('/laporan/labarugi', [LaporanController::class, 'labarugi']);
             // Route::post('/dashboard/chart', [DashboardController::class, 'chartDashboard']);
 
             Route::apiResource('/krs', KRSController::class);
