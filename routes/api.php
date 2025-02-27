@@ -53,6 +53,9 @@ Route::prefix('/instruktur')->group(
 
     }
 );
+
+Route::get('/verification', [AuthController::class, 'verification']);
+
 Route::prefix('/mahasiswa')->group(
     function () {
         Route::post('/login', [AuthController::class, 'login_mahasiswa']);

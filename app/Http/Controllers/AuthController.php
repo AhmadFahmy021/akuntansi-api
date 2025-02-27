@@ -172,6 +172,25 @@ class AuthController extends Controller
             ],200);
         }
     }
+    public function verification(Request $request) {
+        $otp = OTP::where('batas','<', now()->subDays(7))->delete();
+        $otp = OTP::where('kode', $request->kode)->where('status', 1)->first();
+        if (!$otp) {
+            return response()->json(["message" => "Kode OTP tidak ditemukan atau telah diverifikasi"], 404);
+        } else if ($otp->batas == now()->isAfter($otp->batas)) {
+            $otp->delete();
+            return response()->json(["message" => "Kode OTP telah kadaluwarsa atau tidak valid"], 404);
+        }else if ($otp->batas == now()->isBefore($otp->batas)) {
+            $user = User::find($otp->user_id);
+            $user->updateOrFail(['email_verified_at' => now()]);
+            $otp->update(['status'=> 0]);
+            // $otp->delete();
+            return response()->json([
+                'success' => true,
+                'message' => "Email berhasil di aktivasi",
+            ],200);
+        }
+    }
 
     public function resendOTP(Request $request) {
         $user = User::where('email', $request->email)->first();
