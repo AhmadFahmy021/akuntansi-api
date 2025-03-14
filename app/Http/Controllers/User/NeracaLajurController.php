@@ -51,7 +51,7 @@ class NeracaLajurController extends Controller
             ];
 
             // if ($dataAkun[$key]->saldo_normal == 'debit') {
-            //     # code...
+            //     # code...    
             // }
         }
         return response()->json([
@@ -65,17 +65,17 @@ class NeracaLajurController extends Controller
             ->where('perusahaan_id', $perusahaan->id)
             ->get()
             ->groupBy('akun.nama');
-    
+
         $dataAkun = [];
         $data = [];
-        
+
         $akunList = Akun::all();
-        
+
         foreach ($akunList as $akun) {
             $dataJurnalAkun = isset($dataJurnal[$akun->nama]) ? $dataJurnal[$akun->nama] : collect([]);
-            
+
             $dataSubAkun = SubAkun::where('akun_id', $akun->id)->first();
-            
+
             $saldoAwalDebit = 0;
             $saldoAwalKredit = 0;
             $keuangan = Keuangan::where('perusahaan_id', $perusahaan->id)
@@ -83,29 +83,29 @@ class NeracaLajurController extends Controller
                                 ->first();
             if ($keuangan) {
                 $saldoAwalDebit = $keuangan->debit ?? 0;
-                $saldoAwalKredit = $keuangan->kredit ?? 0; 
+                $saldoAwalKredit = $keuangan->kredit ?? 0;
             }
-            
+
             // Hitung total debit dan kredit dari jurnal untuk akun ini
             $totalDebitJurnal = $dataJurnalAkun->sum(function ($jurnal) {
                 return $jurnal->debit ?? 0; // Jika debit null, dianggap 0
             });
             $totalKreditJurnal = $dataJurnalAkun->sum(function ($jurnal) {
-                return $jurnal->kredit ?? 0; 
+                return $jurnal->kredit ?? 0;
             });
-            
+
             // Tambahkan saldo awal ke dalam total debit dan kredit
             $totalDebit = $saldoAwalDebit + $totalDebitJurnal;
             $totalKredit = $saldoAwalKredit + $totalKreditJurnal;
-            
+
             if ($akun->saldo_normal === 'debit') {
 
                 $saldoAkhir = $totalDebit - $totalKredit;
-                
+
                 $data[$akun->nama] = [
                     'akun' => $akun,
                     'sub_akun' => $dataSubAkun,
-                    'debit' => $saldoAkhir > 0 ? $saldoAkhir : 0  , 
+                    'debit' => $saldoAkhir > 0 ? $saldoAkhir : 0  ,
                     'kredit' => $saldoAkhir < 0 ? abs($saldoAkhir) : 0,
                 ];
             } elseif ($akun->saldo_normal === 'kredit') {
@@ -113,12 +113,12 @@ class NeracaLajurController extends Controller
                 $data[$akun->nama] = [
                     'akun' => $akun,
                     'sub_akun' => $dataSubAkun,
-                    'debit' => $saldoAkhir < 0 ? abs($saldoAkhir) : 0, 
+                    'debit' => $saldoAkhir < 0 ? abs($saldoAkhir) : 0,
                     'kredit' => $saldoAkhir > 0 ? $saldoAkhir : 0  ,
                 ];
             }
         }
-    
+
         return response()->json([
             'success' => true,
             'data' => $data,

@@ -75,6 +75,7 @@ Route::prefix('/mahasiswa')->group(
             Route::get('/laporan/keuangan', [LaporanController::class, 'keuangan']);
             Route::get('/laporan/labarugi', [LaporanController::class, 'labarugi']);
             Route::get('/laporan/ekuitas', [LaporanController::class, 'ekuitas']);
+            Route::get('/laporan/posisikeuangan', [LaporanController::class, 'posisi_keuangan']);
             // Route::post('/dashboard/chart', [DashboardController::class, 'chartDashboard']);
 
             Route::apiResource('/krs', KRSController::class);
@@ -87,6 +88,6 @@ Route::prefix('/mahasiswa')->group(
     }
 );
 
-Route::get('/test', function (Request $request) {
+Route::get('/user', function (Request $request) {
     return Auth::user();
 })->middleware('auth:sanctum');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProfileMahasiswa;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -15,11 +16,10 @@ class ProfileMahasiswaController extends Controller
      */
     public function index()
     {
-        $data = ProfileMahasiswa::with(['user'])->get();
+        $profile = ProfileMahasiswa::with(['user'])->where('user_id', Auth::user()->id)->get();
         return response()->json([
             'success' => true,
-            'data' => $data,
-            'user' => Auth::user(),
+            'data' => $profile
         ], 200);
     }
 
@@ -57,18 +57,20 @@ class ProfileMahasiswaController extends Controller
      */
     public function show(string $profileMahasiswa)
     {
-        try {
-            $profile = ProfileMahasiswa::with(['user'])->findOrFail($profileMahasiswa);
+        // dd($profileMahasiswa);
+        // try {
+            // $user = User::findOrFail(Auth::user()->id);
+            $profile = ProfileMahasiswa::with(['user'])->where('user_id', Auth::user()->id);
             return response()->json([
                 'success' => true,
                 'data' => $profile
             ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Data Not Found'
-            ], 200);
-        }
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         'success' => true,
+        //         'message' => 'Data Not Found'
+        //     ], 200);
+        // }
     }
 
     /**
