@@ -77,19 +77,29 @@ class KeuanganController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $perusahaan_id)
     {
         try {
-            $data = Keuangan::with(['akun','perusahaan', 'sub_akun'])->findOrFail($id);
+            $data = Keuangan::with(['akun', 'perusahaan', 'sub_akun'])
+                            ->where('perusahaan_id', $perusahaan_id)
+                            ->get();
+
+            if ($data->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data Not Found'
+                ], 404);
+            }
+
             return response()->json([
                 'success' => true,
                 'data' => $data,
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'success' => true,
-                'message' => 'Data Not Found'
-            ], 404);
+                'success' => false,
+                'message' => 'An error occurred'
+            ], 500);
         }
     }
 
