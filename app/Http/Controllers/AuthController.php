@@ -42,7 +42,7 @@ class AuthController extends Controller
     public function register_mahasiswa(Request $request) {
         $validated = $request->validate([
             'name' => 'required',
-            'nim' => 'required',
+            'nim' => 'required|unique:users,nim',
             'email' => 'required|email|unique:users,email',
             'password' => 'required'
         ]);
