@@ -24,6 +24,7 @@ class AuthController extends Controller
         if (Auth::attempt(["nim"=> $request->nim, "password"=> $request->password])) {
             $user = Auth::user();
             $data['token'] = $user->createToken('token')->plainTextToken;
+            $data['id'] = $user->id;
             $data['nama'] = $user->name;
             $data['nim'] = $user->nim;
             $data['email'] = $user->email;
