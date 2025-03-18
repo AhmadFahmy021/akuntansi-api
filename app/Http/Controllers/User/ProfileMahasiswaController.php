@@ -16,7 +16,7 @@ class ProfileMahasiswaController extends Controller
      */
     public function index()
     {
-        $profile = ProfileMahasiswa::with(['user'])->where('user_id', Auth::user()->id)->get();
+        $profile = ProfileMahasiswa::with(['user'])->where('user_id', Auth::user()->id)->first();
         return response()->json([
             'success' => true,
             'data' => $profile
