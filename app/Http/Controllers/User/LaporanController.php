@@ -597,8 +597,10 @@ class LaporanController extends Controller
 
         $dataTotalAset = $dataAsetTetap['total_keseluruhan']+$dataAsetLancar['total_keseluruhan'];
         $dataTotalKewajibanModal = $dataKewajiban['total_keseluruhan']+$dataEkuitas['total_keseluruhan'];
-        
+
         $data = [
+            "success" => true,
+            "perusahaan" => $perusahaan,
             "aset_lancar" => $dataAsetLancar,
             "aset_tetap" => $dataAsetTetap,
             "kewajiban" => $dataKewajiban,

@@ -63,7 +63,9 @@ class NeracaLajurController extends Controller
         ]);
     }
     public function setelahPenyesuaian() {
-        $perusahaan = Perusahaan::where('status', 'online')->first();
+        $krs = Krs::where('user_id', Auth::user()->id)->get()->pluck('id');
+        $perusahaan = Perusahaan::where('status', 'online')->whereIn('krs_id', $krs)->first();
+        // $perusahaan = Perusahaan::where('status', 'online')->first();
         $dataJurnal = Jurnal::with(['akun', 'subAkun', 'perusahaan'])
             ->where('perusahaan_id', $perusahaan->id)
             ->get()
