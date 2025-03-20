@@ -10,11 +10,14 @@ use App\Models\Perusahaan;
 use App\Models\NeracaLajur;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Krs;
+use Illuminate\Support\Facades\Auth;
 
 class NeracaLajurController extends Controller
 {
     public function sebelumPenyesuaian() {
-        $perusahaan = Perusahaan::where('status', 'online')->first();
+        $krs = Krs::where('user_id', Auth::user()->id)->get()->pluck('id');
+        $perusahaan = Perusahaan::where('status', 'online')->whereIn('krs_id', $krs)->first();
         $dataJurnal = Jurnal::with(['akun', 'subAkun', 'perusahaan'])->where('bukti', '!=', 'JP')->where('perusahaan_id', $perusahaan->id)->get()->sortBy('akun.kode', SORT_NATURAL)->groupBy('akun.nama');
 
         $dataAkun = [];
@@ -51,7 +54,7 @@ class NeracaLajurController extends Controller
             ];
 
             // if ($dataAkun[$key]->saldo_normal == 'debit') {
-            //     # code...    
+            //     # code...
             // }
         }
         return response()->json([
