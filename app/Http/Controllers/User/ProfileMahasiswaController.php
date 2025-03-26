@@ -94,7 +94,9 @@ class ProfileMahasiswaController extends Controller
                 'facebook' => 'nullable',
             ]);
             if ($request->hasFile("foto") && $request->file('foto')->isValid()) {
-                Storage::disk('public')->delete($profile->foto);
+                if (!empty($profile->foto)) {
+                    Storage::disk('public')->delete($profile->foto);
+                }
                 $validated['foto'] = $request->file('foto')->store('profiles', 'public');
             }
             $profile->update($validated);
