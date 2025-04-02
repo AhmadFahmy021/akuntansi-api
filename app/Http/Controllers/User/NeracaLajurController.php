@@ -17,40 +17,43 @@ class NeracaLajurController extends Controller
 {
     public function sebelumPenyesuaian() {
         $krs = Krs::where('user_id', Auth::user()->id)->get()->pluck('id');
-        $perusahaan = Perusahaan::where('status', 'online')->whereIn('krs_id', $krs)->first();
+        $perusahaan = Perusahaan::whereIn('krs_id', $krs)->where('status', 'online')->first();
         $dataJurnal = Jurnal::with(['akun', 'subAkun', 'perusahaan'])->where('bukti', '!=', 'JP')->where('perusahaan_id', $perusahaan->id)->get()->sortBy('akun.kode', SORT_NATURAL)->groupBy('akun.nama');
+        // dd($dataJurnal);
 
         $dataAkun = [];
         $data = [];
         foreach ($dataJurnal as $key => $value) {
             $dataAkun[$key] = Akun::where('nama', $key)->first();
             $dataSubAkun[$key] = SubAkun::where('akun_id', $dataAkun[$key]->id)->first();
+            $debit = Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->where('perusahaan_id', $perusahaan->id)->sum('debit');
+            $kredit = Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->where('perusahaan_id', $perusahaan->id)->sum('kredit');
             $data[$key] = [
                 'akun' => $dataAkun[$key],
                 'sub_akun' => $dataSubAkun[$key],
 
                 "debit" =>
                 ((
-                    Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('debit')
+                    $debit
                     -
-                    Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('kredit')
+                    $kredit
 
                 ) > 0) ?
 
-                Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('debit')
+                $debit
                 -
-                Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('kredit') : 0 ,
+                $kredit : 0 ,
 
                 "kredit" =>
                 ((
-                Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('debit')
+                $debit
                 -
-                Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('kredit')
+                $kredit
                 ) < 0) ?
 
-                (Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('debit')
+                ($debit
                 -
-                Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->sum('kredit')) * -1  : 0,
+                $kredit) * -1  : 0,
             ];
 
             // if ($dataAkun[$key]->saldo_normal == 'debit') {
