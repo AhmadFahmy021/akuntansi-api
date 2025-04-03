@@ -15,34 +15,6 @@ use App\Models\LabaBersihSetelahPajak;
 
 class LaporanController extends Controller
 {
-    // public function keuangan()  {
-    //     $krs = Krs::where('user_id', Auth::user()->id)->get()->pluck('id');
-    //     $perusahaan = Perusahaan::whereIn('krs_id', $krs)->where('status', 'online')->first();
-
-    //     $dataJurnal = Jurnal::with(['akun', 'subAkun', 'perusahaan'])->where('perusahaan_id', $perusahaan->id)->get()->groupBy('akun.nama');
-    //     $dataAkun = [];
-    //     $data = [];
-    //     $key2 = 0;
-    //     foreach ($dataJurnal as $key => $value) {
-    //         $dataAkun[$key] = Akun::where('nama', $key)->first();
-    //         $dataSubAkun[$key] = SubAkun::where('akun_id', $dataAkun[$key]->id)->first();
-    //         $data[$key2++] = [
-    //             'akun' => $dataAkun[$key],
-    //             "debit" =>
-    //             (Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('debit') - Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('kredit') > 0) ?
-    //             Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('debit') - Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('kredit') : 0,
-
-    //             "kredit" =>
-    //             (Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('debit') - Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('kredit') < 0) ?
-    //             (Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('debit') - Jurnal::where('akun_id', $dataAkun[$key]->id)->sum('kredit')) * -1 : 0,
-    //         ];
-    //     }
-    //     return response()->json([
-    //         'success' => true,
-    //         'perusahan' => $perusahaan,
-    //         'data' => $data,
-    //     ]);
-    // }
     public function keuangan() {
         $krs = Krs::where('user_id', Auth::user()->id)->pluck('id');
         $perusahaan = Perusahaan::whereIn('krs_id', $krs)->where('status', 'online')->first();
@@ -105,8 +77,8 @@ class LaporanController extends Controller
         $data = [];
 
         foreach ($dataAkun as $akun) {
-            $totalDebit = Jurnal::where('akun_id', $akun->id)->sum('debit');
-            $totalKredit = Jurnal::where('akun_id', $akun->id)->sum('kredit');
+            $totalDebit = Jurnal::where('akun_id', $akun->id)->where('perusahaan_id', $perusahaan->id)->sum('debit');
+            $totalKredit = Jurnal::where('akun_id', $akun->id)->where('perusahaan_id', $perusahaan->id)->sum('kredit');
             $nilai = ($akun->saldo_normal == 'debit') ? ($totalDebit - $totalKredit) : ($totalKredit - $totalDebit);
             $nilai = abs($nilai);
             $data[$akun->nama] = ['akun' => $akun, 'nilai' => $nilai, 'debit' => $totalDebit, 'kredit' => $totalKredit];
@@ -124,8 +96,8 @@ class LaporanController extends Controller
         $totalPenghasilan = 0;
 
         foreach ($akunPenghasilan as $akun) {
-            $totalDebit = Jurnal::where('akun_id', $akun->id)->sum('debit');
-            $totalKredit = Jurnal::where('akun_id', $akun->id)->sum('kredit');
+            $totalDebit = Jurnal::where('akun_id', $akun->id)->where('perusahaan_id', $perusahaan->id)->sum('debit');
+            $totalKredit = Jurnal::where('akun_id', $akun->id)->where('perusahaan_id', $perusahaan->id)->sum('kredit');
             $nilai = ($akun->saldo_normal == 'debit') ? ($totalDebit - $totalKredit) : ($totalKredit - $totalDebit);
             $nilai = abs($nilai);
             $akunPenghasilanData[$akun->nama] = $nilai;
