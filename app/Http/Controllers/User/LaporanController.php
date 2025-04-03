@@ -484,33 +484,33 @@ class LaporanController extends Controller
         foreach ($akun as $key => $value) {
             if((int)substr(strval($value['kode']), 0, 2) == 11 && $value['kode'] != 1121){
                 if ($value['kode'] != 1121) {
-                    $totalKredit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit');
-                    $totalDebit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit');
+                    $totalAllKredit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit');
+                    $totalAllDebit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit');
                     $dataAkunAsetLancar[$key2++] = [
                         "akun" =>$value,
                         "kode" =>$value['kode'],
-                        'total' => abs($totalDebit-$totalKredit),
+                        'total' => abs($totalAllDebit-$totalAllKredit),
                     ];
 
                 }
             } else if((int)substr(strval($value['kode']), 0, 2) == 12 | $value['kode'] == 1121){
                 // if ($value['kode'] == 1121) {
-                    $totalKredit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit')+Keuangan::where('akun_id', $value['id'])->get()->sum('kredit');
-                    $totalDebit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit');
+                    $totalAllKredit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit');
+                    $totalAllDebit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit');
                     $dataAkunAsetTetap[$key2++] = [
                         "akun" =>$value,
                         "kode" =>$value['kode'],
-                        'total' => abs($totalDebit-$totalKredit),
+                        'total' => abs($totalAllDebit-$totalAllKredit),
                     ];
 
                 // }
             } else if(in_array((int)substr(strval($value['kode']), 0, 2), [21, 22]) ){
-                $totalKredit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit');
-                $totalDebit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit');
+                $totalAllKredit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit');
+                $totalAllDebit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit');
                 $dataAkunKewajiban[$key2++] = [
                     "akun" =>$value,
                     "kode" =>$value['kode'],
-                    'total' => abs($totalDebit-$totalKredit),
+                    'total' => abs($totalAllDebit-$totalAllKredit),
                 ];
             } else if(in_array($value['kode'], [3111, 3112, 3121]) ){
                 $totalKredit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit');
