@@ -19,7 +19,6 @@ class NeracaLajurController extends Controller
         $krs = Krs::where('user_id', Auth::user()->id)->get()->pluck('id');
         $perusahaan = Perusahaan::whereIn('krs_id', $krs)->where('status', 'online')->first();
         $dataJurnal = Jurnal::with(['akun', 'subAkun', 'perusahaan'])->where('bukti', '!=', 'JP')->where('perusahaan_id', $perusahaan->id)->get()->sortBy('akun.kode', SORT_NATURAL)->groupBy('akun.nama');
-        // dd($dataJurnal);
 
         $dataAkun = [];
         $data = [];
@@ -31,34 +30,9 @@ class NeracaLajurController extends Controller
             $data[$key] = [
                 'akun' => $dataAkun[$key],
                 'sub_akun' => $dataSubAkun[$key],
-
-                "debit" =>
-                ((
-                    $debit
-                    -
-                    $kredit
-
-                ) > 0) ?
-
-                $debit
-                -
-                $kredit : 0 ,
-
-                "kredit" =>
-                ((
-                $debit
-                -
-                $kredit
-                ) < 0) ?
-
-                ($debit
-                -
-                $kredit) * -1  : 0,
+                "debit" => (($debit-$kredit) > 0) ? $debit-$kredit : 0,
+                "kredit" => (($debit-$kredit) < 0) ? abs($debit-$kredit): 0,
             ];
-
-            // if ($dataAkun[$key]->saldo_normal == 'debit') {
-            //     # code...
-            // }
         }
         return response()->json([
             'success' => true,
