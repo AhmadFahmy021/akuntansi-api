@@ -105,11 +105,11 @@ class LaporanController extends Controller
         }
 
         $result['Penghasilan'] = [
-            'Penjualan' => isset($data['Penjualan']) ? $data['Penjualan']['nilai'] : 0,
-            'Potongan Penjualan' => isset($data['Potongan Penjualan']) ? $data['Potongan Penjualan']['nilai'] : 0,
-            'Retur Penjualan' => isset($data['Retur Penjualan']) ? $data['Retur Penjualan']['nilai'] : 0,
-            'Hasil Retur Penjualan & Potongan Penjualan' => $hasilReturDanPotongan,
-            'Penjualan Bersih' => $penjualanBersih,
+            'Penjualan' => ['nilai' => isset($data['Penjualan']) ? $data['Penjualan']['nilai'] : 0, 'akun' => $data['Penjualan']['akun']],
+            'Potongan Penjualan' => ['nilai'=>isset($data['Potongan Penjualan']) ? $data['Potongan Penjualan']['nilai'] : 0, 'akun' => isset($data['Potongan Penjualan']['akun']) ? $data['Potongan Penjualan']['akun'] : null],
+            'Retur Penjualan' => ['nilai' => isset($data['Retur Penjualan']) ? $data['Retur Penjualan']['nilai'] : 0, 'akun' => isset($data['Retur Penjualan']['akun'])? $data['Retur Penjualan']['akun'] : null],
+            'Hasil Retur Penjualan & Potongan Penjualan' => ['nilai' => $hasilReturDanPotongan, 'akun' => isset($data['Retur Penjualan']['akun'])? $data['Retur Penjualan']['akun'] : null],
+            'Penjualan Bersih' => ['nilai' => $penjualanBersih, 'akun' => isset($data['Penjualan']['akun'])? $data['Penjualan']['akun'] : null],
         ];
 
         foreach ($akunPenghasilanData as $namaAkun => $nilaiAkun) {
