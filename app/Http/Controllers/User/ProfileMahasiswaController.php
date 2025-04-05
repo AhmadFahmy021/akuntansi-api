@@ -78,7 +78,7 @@ class ProfileMahasiswaController extends Controller
      */
     public function update(Request $request, string $profileMahasiswa)
     {
-        try {
+        // try {
             $profile = ProfileMahasiswa::findOrFail($profileMahasiswa);
             $validated = $request->validate([
                 'user_id' => 'sometimes|uuid',
@@ -94,7 +94,8 @@ class ProfileMahasiswaController extends Controller
                 'facebook' => 'nullable',
             ]);
             if ($request->hasFile("foto") && $request->file('foto')->isValid()) {
-                Storage::disk('public')->delete($profile->foto);
+                if (!empty($profile->foto)) {
+                    Storage::disk('public')->delete($profile->foto);}
                 $validated['foto'] = $request->file('foto')->store('profiles', 'public');
             }
             $profile->update($validated);
@@ -103,12 +104,12 @@ class ProfileMahasiswaController extends Controller
                 'message' => 'Data Successfully Chaged',
                 'data' => $profile
             ], 200);
-        } catch (\Throwable $th) {
+        // } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
                 'message' => 'Data Failed Chaged',
             ], 404);
-        }
+        // }
     }
 
     /**
