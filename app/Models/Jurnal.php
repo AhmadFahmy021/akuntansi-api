@@ -29,7 +29,7 @@ class Jurnal extends Model
      */
     public function subAkun(): BelongsTo
     {
-        return $this->belongsTo(subAkun::class, 'sub_akun_id', 'id');
+        return $this->belongsTo(SubAkun::class, 'sub_akun_id', 'id');
     }
 
     /**
