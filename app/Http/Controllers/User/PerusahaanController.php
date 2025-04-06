@@ -4,11 +4,13 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Akun;
+use App\Models\Keuangan;
 use App\Models\Krs;
 use App\Models\Perusahaan;
 use App\Models\SubAkun;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class PerusahaanController extends Controller
 {
@@ -32,7 +34,7 @@ class PerusahaanController extends Controller
      */
     public function store(Request $request)
     {
-        $request = $request->validate([
+        $validated = $request->validate([
             'nama' => 'required|string',
             'alamat' => 'required|string',
             'tahun_berdiri' => 'required|integer',
@@ -42,7 +44,19 @@ class PerusahaanController extends Controller
             'end_priode' => 'required|date',
             'krs_id' => 'required',
         ]);
-        Perusahaan::create($request);
+        $perusahaan = Perusahaan::create($validated);
+
+        $akun = Akun::where('kategori_id', $request->kategori_id)->get()->pluck('id');
+        $keuangan = $akun->map(fn($value) => [
+            'id' => Str::uuid()->toString(),
+            'akun_id' => $value,
+            'perusahaan_id' => $perusahaan->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ])->toArray();
+
+        Keuangan::insert($keuangan);
+
         return response()->json([
             'success' => true,
             'message' => "Data successfully saved",
