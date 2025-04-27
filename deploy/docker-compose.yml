@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  laravel:
+  akuntansi-api:
     restart: unless-stopped
     container_name: akuntansi-api-v1
     build:
