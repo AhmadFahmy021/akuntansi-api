@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*','http://localhost:3000'],
+    'allowed_origins' => ['*','http://localhost:3000','http://103.150.196.67:3002', 'http://103.150.196.67:3001','https://akuntasi.devcomumm.site'],
 
     'allowed_origins_patterns' => [],
 
