@@ -78,6 +78,8 @@ COPY ./deploy/nginx.conf /etc/nginx/http.d/default.conf
 COPY ./deploy/php.ini "$PHP_INI_DIR/conf.d/app.ini"
 
 WORKDIR /var/www/html
+COPY ./deploy/entrypoint.sh /var/www/html/deploy/entrypoint.sh
+RUN chmod +x /var/www/html/deployl/entrypoint.sh
 
 # add all folders where files are being stored that require persistence. if needed, otherwise remove this line.
 VOLUME ["/var/www/html/storage/app"]
