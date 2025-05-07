@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProfileMahasiswa;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -15,11 +16,10 @@ class ProfileMahasiswaController extends Controller
      */
     public function index()
     {
-        $data = ProfileMahasiswa::with(['user'])->get();
+        $profile = ProfileMahasiswa::with(['user'])->where('user_id', Auth::user()->id)->first();
         return response()->json([
             'success' => true,
-            'data' => $data,
-            'user' => Auth::user(),
+            'data' => $profile
         ], 200);
     }
 
@@ -57,18 +57,20 @@ class ProfileMahasiswaController extends Controller
      */
     public function show(string $profileMahasiswa)
     {
-        try {
-            $profile = ProfileMahasiswa::with(['user'])->findOrFail($profileMahasiswa);
+        // dd($profileMahasiswa);
+        // try {
+            // $user = User::findOrFail(Auth::user()->id);
+            $profile = ProfileMahasiswa::with(['user'])->where('user_id', Auth::user()->id);
             return response()->json([
                 'success' => true,
                 'data' => $profile
             ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Data Not Found'
-            ], 200);
-        }
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         'success' => true,
+        //         'message' => 'Data Not Found'
+        //     ], 200);
+        // }
     }
 
     /**
@@ -76,7 +78,7 @@ class ProfileMahasiswaController extends Controller
      */
     public function update(Request $request, string $profileMahasiswa)
     {
-        try {
+        // try {
             $profile = ProfileMahasiswa::findOrFail($profileMahasiswa);
             $validated = $request->validate([
                 'user_id' => 'sometimes|uuid',
@@ -101,12 +103,12 @@ class ProfileMahasiswaController extends Controller
                 'message' => 'Data Successfully Chaged',
                 'data' => $profile
             ], 200);
-        } catch (\Throwable $th) {
+        // } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
                 'message' => 'Data Failed Chaged',
             ], 404);
-        }
+        // }
     }
 
     /**
@@ -116,7 +118,7 @@ class ProfileMahasiswaController extends Controller
     {
         try {
             $profile = ProfileMahasiswa::findOrFail($profileMahasiswa);
-            Storage::disk('public')->delete($profile->foto);
+            if (!empty($profile->foto)) Storage::disk('public')->delete($profile->foto);
             $profile->delete();
             // dd($profile);
             return response()->json([

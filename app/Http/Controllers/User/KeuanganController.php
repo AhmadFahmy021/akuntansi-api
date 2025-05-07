@@ -5,8 +5,12 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Jurnal;
 use App\Models\Keuangan;
+use App\Models\Perusahaan;
+use App\Models\Krs;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+
+use Illuminate\Support\Facades\Auth;
 
 class KeuanganController extends Controller
 {
@@ -15,7 +19,9 @@ class KeuanganController extends Controller
      */
     public function index()
     {
-        $data = Keuangan::with(['akun','perusahaan', 'sub_akun'])->get();
+        $krs = Krs::where('user_id', Auth::user()->id)->get()->pluck('id');
+        $perusahaan = Perusahaan::whereIn('krs_id', $krs)->where('status', 'online')->first();
+        $data = Keuangan::with(['akun','perusahaan', 'sub_akun'])->where('perusahaan_id', $perusahaan->id)->get();
         return response()->json([
             'success' => true,
             'data' => $data

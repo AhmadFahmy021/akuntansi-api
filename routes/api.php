@@ -21,6 +21,7 @@ use App\Http\Controllers\User\PerusahaanController;
 use App\Http\Controllers\User\ProfileMahasiswaController;
 use App\Http\Controllers\User\RingkasanController;
 use App\Http\Controllers\User\SubAkunController;
+use Illuminate\Support\Facades\Auth;
 
 Route::prefix('/instruktur')->group(
     function () {
@@ -52,6 +53,9 @@ Route::prefix('/instruktur')->group(
 
     }
 );
+
+Route::get('/verification', [AuthController::class, 'verification']);
+
 Route::prefix('/mahasiswa')->group(
     function () {
         Route::post('/login', [AuthController::class, 'login_mahasiswa']);
@@ -70,6 +74,8 @@ Route::prefix('/mahasiswa')->group(
             Route::post('/dashboard/chart', [DashboardController::class, 'chartDashboard']);
             Route::get('/laporan/keuangan', [LaporanController::class, 'keuangan']);
             Route::get('/laporan/labarugi', [LaporanController::class, 'labarugi']);
+            Route::get('/laporan/ekuitas', [LaporanController::class, 'ekuitas']);
+            Route::get('/laporan/posisikeuangan', [LaporanController::class, 'posisi_keuangan']);
             // Route::post('/dashboard/chart', [DashboardController::class, 'chartDashboard']);
 
             Route::apiResource('/krs', KRSController::class);
@@ -82,6 +88,6 @@ Route::prefix('/mahasiswa')->group(
     }
 );
 
-Route::get('/test', function (Request $request) {
-    return $request->user();
+Route::get('/user', function (Request $request) {
+    return Auth::user();
 })->middleware('auth:sanctum');

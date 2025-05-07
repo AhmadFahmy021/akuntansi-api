@@ -4,8 +4,11 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Jurnal;
+use App\Models\Krs;
+use App\Models\Perusahaan;
 use App\Models\SubAkun;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 use function Laravel\Prompts\error;
 
@@ -16,7 +19,9 @@ class JurnalController extends Controller
      */
     public function index()
     {
-        $data = Jurnal::with(['akun', 'subAkun', 'perusahaan',])->get()->sortByDesc('tanggal')->groupBy('keterangan');
+        $krs = Krs::where('user_id', Auth::user()->id)->get()->pluck('id');
+        $perusahaan = Perusahaan::whereIn('krs_id', $krs)->where('status', 'online')->first();
+        $data = Jurnal::with(['akun', 'subAkun', 'perusahaan',])->where('perusahaan_id', $perusahaan->id)->get()->sortBy('tanggal')->groupBy('keterangan');
         return response()->json([
             'success' => true,
             'data' => $data,
