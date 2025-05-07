@@ -18,42 +18,42 @@ class LaporanController extends Controller
     public function keuangan() {
         $krs = Krs::where('user_id', Auth::user()->id)->pluck('id');
         $perusahaan = Perusahaan::whereIn('krs_id', $krs)->where('status', 'online')->first();
-
+    
         if (!$perusahaan) {
             return response()->json([
                 'success' => false,
                 'message' => 'Perusahaan tidak ditemukan atau belum online.'
             ], 404);
         }
-
+    
         $dataJurnal = Jurnal::with(['akun', 'subAkun', 'perusahaan'])
             ->where('perusahaan_id', $perusahaan->id)
             ->get()
             ->groupBy('akun.nama');
-
+    
         $data = [];
         $totalKeseluruhan = 0; // Variabel untuk menampung total keseluruhan
-
+    
         foreach ($dataJurnal as $key => $value) {
             $akun = Akun::where('nama', $key)->first();
             if (!$akun) continue;
-
+    
             $totalDebit = Jurnal::where('akun_id', $akun->id)->sum('debit');
             $totalKredit = Jurnal::where('akun_id', $akun->id)->sum('kredit');
-
+            
             // Tentukan total berdasarkan saldo normal
             $total = ($akun->saldo_normal == 'debit') ? ($totalDebit - $totalKredit) : ($totalKredit - $totalDebit);
             $total = abs($total); // Pastikan tidak negatif
-
+    
             $data[] = [
                 'akun' => $akun,  // Menampilkan semua field dari akun
                 'total' => $total
             ];
-
+    
             // Tambahkan ke total keseluruhan
             $totalKeseluruhan += $total;
         }
-
+    
         return response()->json([
             'success' => true,
             'perusahaan' => $perusahaan, // Menampilkan semua field dari perusahaan
@@ -61,7 +61,6 @@ class LaporanController extends Controller
             'total_keseluruhan' => $totalKeseluruhan // Tambahan total keseluruhan dari semua akun
         ]);
     }
-  
     public function labarugi() {
         $krs = Krs::where('user_id', Auth::user()->id)->pluck('id');
         $perusahaan = Perusahaan::whereIn('krs_id', $krs)->where('status', 'online')->first();
@@ -429,6 +428,7 @@ $result['Pendapatan dan Biaya Diluar Usaha'] = [
                 'nilai' => $labaBersihSetelahPajak,
             ]
         ];
+    
         return response()->json([
             'success' => true,
             'perusahaan' => $perusahaan,
@@ -590,120 +590,4 @@ $result['Pendapatan dan Biaya Diluar Usaha'] = [
             'data' => $result  // "data" now has a list of objects
         ]);
     }
-   
-
-    public function posisi_keuangan(){
-        $krs = Krs::where('user_id', Auth::user()->id)->pluck('id');
-        $perusahaan = Perusahaan::whereIn('krs_id', $krs)->where('status', 'online')->first();
-        $akun = Akun::where('kategori_id', $perusahaan->kategori_id)->get();
-
-        $dataAkunAsetLancar=[];
-        $dataAkunAsetTetap=[];
-        $dataAkunKewajiban=[];
-        $dataAkunEkuitas=[];
-        $key2 = 0;
-        foreach ($akun as $key => $value) {
-            if((int)substr(strval($value['kode']), 0, 2) == 11 && $value['kode'] != 1121){
-                if ($value['kode'] != 1121) {
-                    $totalAllKredit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit');
-                    $totalAllDebit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit');
-                    $dataAkunAsetLancar[$key2++] = [
-                        "akun" =>$value,
-                        "kode" =>$value['kode'],
-                        'total' => abs($totalAllDebit-$totalAllKredit),
-                    ];
-
-                }
-            } else if((int)substr(strval($value['kode']), 0, 2) == 12 | $value['kode'] == 1121){
-                // if ($value['kode'] == 1121) {
-                    $totalAllKredit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit');
-                    $totalAllDebit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit');
-                    $dataAkunAsetTetap[$key2++] = [
-                        "akun" =>$value,
-                        "kode" =>$value['kode'],
-                        'total' => abs($totalAllDebit-$totalAllKredit),
-                    ];
-
-                // }
-            } else if(in_array((int)substr(strval($value['kode']), 0, 2), [21, 22]) ){
-                $totalAllKredit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit');
-                $totalAllDebit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit');
-                $dataAkunKewajiban[$key2++] = [
-                    "akun" =>$value,
-                    "kode" =>$value['kode'],
-                    'total' => abs($totalAllDebit-$totalAllKredit),
-                ];
-            } else if(in_array($value['kode'], [3111, 3112, 3121]) ){
-                $totalKredit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('kredit');
-                $totalDebit = Jurnal::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit')+Keuangan::where('akun_id', $value['id'])->where('perusahaan_id', $perusahaan->id)->get()->sum('debit');
-                $dataAkunEkuitas[$key2++] = [
-                    "akun" =>$value,
-                    "kode" =>$value['kode'],
-                    'total' => abs($totalDebit-$totalKredit),
-                ];
-            }
-        }
-
-
-        $dataAsetLancar = [];
-        $dataAsetTetap = [];
-        $dataKewajiban = [];
-        $dataEkuitas = [];
-
-        $totalAsetLancar = 0;
-        $totalAsetTetap = 0;
-        $totalKewajiban = 0;
-        $totalEkuitas = 0;
-
-        foreach ($dataAkunAsetLancar as $key => $value) {
-            if ($value['kode'] != 1153) {
-                $totalAsetLancar += $value['total'];
-            } else {
-                $totalAsetLancar -= $value['total'];
-            }
-        }
-        $dataAsetLancar['akun'] = $dataAkunAsetLancar;
-        $dataAsetLancar['total_keseluruhan'] = $totalAsetLancar;
-
-        foreach ($dataAkunAsetTetap as $key => $value) {
-            if (!in_array($value['kode'], [1225, 1222, 1223, 1224])) {
-                $totalAsetTetap += $value['total'];
-            } else {
-                $totalAsetTetap -= $value['total'];
-            }
-            // $dataAsetTetap[$key] = $value['total'];
-        }
-        $dataAsetTetap['akun'] = $dataAkunAsetTetap;
-        $dataAsetTetap['total_keseluruhan'] = $totalAsetTetap;
-
-        foreach ($dataAkunKewajiban as $key => $value) {
-                $totalKewajiban += $value['total'];
-        }
-        $dataKewajiban['akun'] = $dataAkunKewajiban;
-        $dataKewajiban['total_keseluruhan'] = $totalKewajiban;
-
-        foreach ($dataAkunEkuitas as $key => $value) {
-                $totalEkuitas += $value['total'];
-        }
-        $dataEkuitas['akun'] = $dataAkunEkuitas;
-        $dataEkuitas['total_keseluruhan'] = $totalEkuitas;
-
-        $dataTotalAset = $dataAsetTetap['total_keseluruhan']+$dataAsetLancar['total_keseluruhan'];
-        $dataTotalKewajibanModal = $dataKewajiban['total_keseluruhan']+$dataEkuitas['total_keseluruhan'];
-
-        $data = [
-            "success" => true,
-            "perusahaan" => $perusahaan,
-            "aset_lancar" => $dataAsetLancar,
-            "aset_tetap" => $dataAsetTetap,
-            "kewajiban" => $dataKewajiban,
-            "ekuitas" => $dataEkuitas,
-            "total_aset" => $dataTotalAset,
-            "total_kewajiban_ekuitas" => $dataTotalKewajibanModal,
-        ];
-
-        return response()->json($data, 200);
-    }
-
-
 }
