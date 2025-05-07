@@ -425,7 +425,11 @@ $result['Pendapatan dan Biaya Diluar Usaha'] = [
         $rugiLuarBiasareal = abs($rugiLuarBiasa);
         $totalLabaRugi = $labaLuarBiasareal - $rugiLuarBiasareal;
         $labaBersihSebelumPajak = $labaBersihSebelumLabaRugiLuarBiasa + $totalLabaRugi;
-        $labaBersihSetelahPajak = $labaBersihSebelumPajak * 0.9;
+        if ($labaBersihSebelumPajak > 0) {
+            $labaBersihSetelahPajak = $labaBersihSebelumPajak * 0.75; 
+        } else {
+            $labaBersihSetelahPajak = $labaBersihSebelumPajak; 
+        }
     
         LabaBersihSetelahPajak::updateOrCreate(
             ['perusahaan_id' => $perusahaan->id],
