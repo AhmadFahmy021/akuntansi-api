@@ -16,17 +16,18 @@ use Illuminate\Support\Facades\Auth;
 class NeracaLajurController extends Controller
 {
     public function sebelumPenyesuaian() {
+
         $krs = Krs::where('user_id', Auth::user()->id)->get()->pluck('id');
         $perusahaan = Perusahaan::whereIn('krs_id', $krs)->where('status', 'online')->first();
-        $dataJurnal = Jurnal::with(['akun', 'subAkun', 'perusahaan'])->where('bukti', '!=', 'JP')->where('perusahaan_id', $perusahaan->id)->get()->sortBy('akun.kode', SORT_NATURAL)->groupBy('akun.nama');
+        $dataJurnal = Jurnal::with(['akun', 'subAkun', 'perusahaan'])->where('perusahaan_id', $perusahaan->id)->whereRaw("SUBSTRING_INDEX(SUBSTRING_INDEX(bukti, '/', 2), '/', -1) != 'BM'")->get()->sortBy('akun.kode', SORT_NATURAL)->groupBy('akun.nama');
 
         $dataAkun = [];
         $data = [];
         foreach ($dataJurnal as $key => $value) {
             $dataAkun[$key] = Akun::where('nama', $key)->first();
             $dataSubAkun[$key] = SubAkun::where('akun_id', $dataAkun[$key]->id)->first();
-            $debit = Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->where('perusahaan_id', $perusahaan->id)->sum('debit');
-            $kredit = Jurnal::where('akun_id', $dataAkun[$key]->id)->where('bukti', '!=', 'JP')->where('perusahaan_id', $perusahaan->id)->sum('kredit');
+            $debit = $value->sum('debit');
+            $kredit = $value->sum('kredit');
             $data[$key] = [
                 'akun' => $dataAkun[$key],
                 'sub_akun' => $dataSubAkun[$key],
@@ -39,6 +40,7 @@ class NeracaLajurController extends Controller
             'data' => $data,
         ]);
     }
+
     public function setelahPenyesuaian() {
         $krs = Krs::where('user_id', Auth::user()->id)->get()->pluck('id');
         $perusahaan = Perusahaan::where('status', 'online')->whereIn('krs_id', $krs)->first();

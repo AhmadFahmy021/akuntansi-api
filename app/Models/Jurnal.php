@@ -41,4 +41,9 @@ class Jurnal extends Model
     {
         return $this->belongsTo(Perusahaan::class, 'perusahaan_id', 'id');
     }
+
+    public function getBuktiExplodedAttribute()
+    {
+        return explode('/', $this->attributes['bukti']);
+    }
 }
